@@ -1,0 +1,26 @@
+name: mirror
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    env:
+      # `just --fmt` formats one file per call: https://github.com/casey/just/issues/1824
+      ENTRY: sh -c 'e=0; for f; do just --fmt --justfile "$f" || e=1; done; exit $e' --
+    steps:
+      - uses: actions/checkout@v7
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - run: >-
+          pipx run --spec pre-commit-mirror-maker pre-commit-mirror .
+          --language=python --package-name=rust-just --id=just-fmt
+          --description="Format justfiles with just --fmt"
+          --entry="$ENTRY" --files-regex='(?i)(^|/)\.?justfile$|\.just$'
+      - run: git push origin HEAD:main --tags
