@@ -1,0 +1,10 @@
+-   id: just-fmt
+    name: 'rust-just'
+    description: 'Format justfiles with just --fmt'
+    entry: sh -c 'e=0; for f; do just --fmt --justfile "$f" || e=1; done; exit $e' --
+    language: python
+    'files': (?i)(^|/)\.?justfile$|\.just$
+    args: []
+    require_serial: false
+    additional_dependencies: []
+    minimum_pre_commit_version: '0'
